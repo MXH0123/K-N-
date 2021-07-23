@@ -1,0 +1,120 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<limits.h>
+#define K 4
+#define N 2
+
+int arr0[2] = {1,2};
+int arr1[2] = {5,6};
+int arr2[2] = {3,7};
+int arr3[2] = {4,8};
+
+struct Node
+{
+    int val;
+    int row;
+    int col;
+};
+
+void swap(struct Node *a, struct Node *b)
+{
+    int tmp = a->val;
+    a->val = b->val;
+    b->val = tmp;
+    tmp = a->row;
+    a->row = b->row;
+    b->row = tmp;
+    tmp = a->col;
+    a->col = b->col;
+    b->col = tmp;
+}
+
+void Adjust(struct Node **heap, int parent)
+{
+    int child = parent*2+1;
+    while(child<K)
+    {
+        if(child+1<K && heap[child+1]->val < heap[child]->val)
+        {
+            child++;
+        }
+        if(heap[child]->val < heap[parent]->val)
+        {
+            swap(heap[child], heap[parent]);
+        }
+        parent = child;
+        child = parent*2+1;
+    }
+}
+
+void Heap_Sort(struct Node **heap)
+{
+    int parent = K/2-1;
+    for(int i=parent; i>=0; i--)
+    {
+        Adjust(heap, parent);
+    }
+}
+
+int *MergeArrays(int **arrays)
+{
+    int cnt = K*N;
+    int *res = (int *)malloc(sizeof(int) * cnt);
+    memset(res, 0, sizeof(int) * cnt);
+    struct Node **heap = (struct Node **)malloc(sizeof(struct Node*) * K);
+    
+    for(int i=0; i<K; i++)
+    {
+        struct Node* newnode = (struct Node *)malloc(sizeof(struct Node));
+        newnode->val = arrays[i][0];
+        newnode->row = i;
+        newnode->col = 0;
+        heap[i] = newnode;
+    }
+    Heap_Sort(heap);
+    int index = 0;
+    while(cnt--)
+    {
+        res[index] = heap[0]->val;
+        index++;
+        if(heap[0]->col == N-1)
+        {
+            heap[0]->val = INT_MAX;
+            heap[0]->row = INT_MAX;
+            heap[0]->col = INT_MAX;
+        }
+        else
+        {   
+            heap[0]->row = heap[0]->row;
+            heap[0]->col = heap[0]->col+1; 
+            heap[0]->val = arrays[heap[0]->row][heap[0]->col];   
+        }
+        Adjust(heap, 0);
+    }
+
+    return res;
+}
+
+int main()
+{
+    int *res = (int *)malloc(sizeof(int) * K*N);
+    memset(res, 0, sizeof(int) * K*N);
+    int **arrays = (int **)malloc(sizeof(int*) * K);
+    for(int i=0; i<K; i++)
+    {
+        arrays[i] = (int *)malloc(sizeof(int) * N);
+    }
+    //如何有效将多个一维数组赋值给二维数组
+    memcpy(arrays[0], arr0, sizeof(int)*2);
+    memcpy(arrays[1], arr1, sizeof(int)*2);
+    memcpy(arrays[2], arr2, sizeof(int)*2);
+    memcpy(arrays[3], arr3, sizeof(int)*2);
+    res = MergeArrays(arrays);
+    for(int i=0; i<K*N; i++)
+    {
+        printf("%d ", res[i]);
+    }
+    printf("\n");
+    return 0;
+}
