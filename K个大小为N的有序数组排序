@@ -42,8 +42,9 @@ void Adjust(struct Node **heap, int parent)
         if(heap[child]->val < heap[parent]->val)
         {
             swap(heap[child], heap[parent]);
+            parent = child;
         }
-        parent = child;
+        
         child = parent*2+1;
     }
 }
